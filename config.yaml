@@ -1,0 +1,25 @@
+# MQTT 数据网关配置文件
+
+# 内置 MQTT Broker 配置（接收设备数据）
+input:
+  host: "0.0.0.0"
+  port: 1883
+  topic: "datachange_S_KIO_Project"  # 设备上报的统一 topic
+
+# 云端 MQTT Broker 配置（输出数据）
+cloud:
+  host: "106.13.190.210"      # 云端 Broker 地址
+  port: 1883
+  username: ""                 # 用户名（可选）
+  password: ""                 # 密码（可选）
+  client_id: "mqtt-gateway"  # Client ID
+  topic_prefix: "gateway"    # 输出 topic 前缀
+
+# 汇聚配置
+aggregation:
+  mode: "timer"              # realtime(实时) 或 timer(定时)
+  timer_interval: 5          # 定时发布间隔（秒）
+
+# 日志配置
+logging:
+  level: "info"              # debug, info, warn, error
