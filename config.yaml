@@ -14,6 +14,8 @@ cloud:
   password: ""                 # 密码（可选）
   client_id: "mqtt-gateway"  # Client ID
   topic_prefix: "gateway"    # 输出 topic 前缀
+  topic_separator: "_"       # topic 分隔符（如 / 或 _）
+  device_separator: "_"       # 设备名分隔符（如 _ 或 /）
 
 # 汇聚配置
 aggregation:

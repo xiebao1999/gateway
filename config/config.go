@@ -21,12 +21,14 @@ type InputConfig struct {
 }
 
 type CloudConfig struct {
-	Host        string `yaml:"host"`
-	Port        int    `yaml:"port"`
-	Username    string `yaml:"username"`
-	Password    string `yaml:"password"`
-	ClientID    string `yaml:"client_id"`
-	TopicPrefix string `yaml:"topic_prefix"`
+	Host            string `yaml:"host"`
+	Port            int    `yaml:"port"`
+	Username        string `yaml:"username"`
+	Password        string `yaml:"password"`
+	ClientID        string `yaml:"client_id"`
+	TopicPrefix     string `yaml:"topic_prefix"`
+	TopicSeparator  string `yaml:"topic_separator"`  // 分隔符，如 "/" 或 "_"
+	DeviceSeparator string `yaml:"device_separator"`  // 设备名与属性分隔符，如 "_" 或 "/"
 }
 
 type AggregationConfig struct {
@@ -58,6 +60,12 @@ func Load(path string) (*Config, error) {
 	}
 	if cfg.Cloud.Port == 0 {
 		cfg.Cloud.Port = 1883
+	}
+	if cfg.Cloud.TopicSeparator == "" {
+		cfg.Cloud.TopicSeparator = "/"  // 默认用 / 分隔
+	}
+	if cfg.Cloud.DeviceSeparator == "" {
+		cfg.Cloud.DeviceSeparator = "_"  // 默认用 _ 分隔
 	}
 	if cfg.Aggregation.TimerInterval == 0 {
 		cfg.Aggregation.TimerInterval = 5

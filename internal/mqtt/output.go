@@ -66,9 +66,18 @@ func (c *OutputClient) Connect() error {
 }
 
 // Publish 发布消息
-// topicKey 格式：工段/设备 (如 "MZ/YC01")
+// topicKey 格式：工段_设备 (如 "MZ/YC01")
 func (c *OutputClient) Publish(topicKey string, data interface{}) error {
-	topic := fmt.Sprintf("%s/%s", c.config.TopicPrefix, topicKey)
+	// 检查连接状态，未连接则尝试重连
+	if !c.IsConnected() {
+		log.Printf("云端 MQTT 未连接，尝试重连...")
+		if err := c.Connect(); err != nil {
+			return fmt.Errorf("重连失败: %w", err)
+		}
+	}
+
+	// 使用配置的分隔符拼接 topic
+	topic := fmt.Sprintf("%s%s%s", c.config.TopicPrefix, c.config.TopicSeparator, topicKey)
 
 	payload, err := json.Marshal(data)
 	if err != nil {

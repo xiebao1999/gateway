@@ -61,7 +61,7 @@ func main() {
 	}
 
 	// 创建数据汇聚器
-	agg := aggregator.New(&cfg.Aggregation, outputClient)
+	agg := aggregator.New(&cfg.Aggregation, outputClient, cfg.Cloud.DeviceSeparator)
 
 	// 创建内置 MQTT 客户端
 	inputClient := mqtt.NewInputClient(&cfg.Input, agg)

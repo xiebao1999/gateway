@@ -19,20 +19,25 @@ type DeviceData struct {
 
 // Aggregator 数据汇聚器
 type Aggregator struct {
-	config    *config.AggregationConfig
-	output    *mqtt.OutputClient
-	data      map[string]map[string]interface{} // key = "segment_device", value = variable->value
-	mu        sync.RWMutex
-	stopCh    chan struct{}
+	config            *config.AggregationConfig
+	output            *mqtt.OutputClient
+	data              map[string]map[string]interface{} // key = "segment_device", value = variable->value
+	mu                sync.RWMutex
+	stopCh            chan struct{}
+	deviceSeparator   string // 设备分隔符，如 "_" 或 "/"
 }
 
 // New 创建数据汇聚器
-func New(cfg *config.AggregationConfig, output *mqtt.OutputClient) *Aggregator {
+func New(cfg *config.AggregationConfig, output *mqtt.OutputClient, deviceSeparator string) *Aggregator {
+	if deviceSeparator == "" {
+		deviceSeparator = "_"
+	}
 	return &Aggregator{
-		config: cfg,
-		output: output,
-		data:   make(map[string]map[string]interface{}),
-		stopCh: make(chan struct{}),
+		config:          cfg,
+		output:          output,
+		data:            make(map[string]map[string]interface{}),
+		stopCh:          make(chan struct{}),
+		deviceSeparator: deviceSeparator,
 	}
 }
 
@@ -41,8 +46,8 @@ func (a *Aggregator) OnMessage(info *mqtt.DeviceInfo) {
 	a.mu.Lock()
 	defer a.mu.Unlock()
 
-	// key = 工段_设备
-	key := info.Segment + "_" + info.Device
+	// key = 工段+设备
+	key := info.Segment + a.deviceSeparator + info.Device
 
 	// 初始化设备数据
 	if _, ok := a.data[key]; !ok {

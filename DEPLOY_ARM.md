@@ -91,6 +91,89 @@ sudo ufw reload
 chmod +x /root/gateway/mqtt-gateway-linux-arm64
 ```
 
+### 3.7 WiFi 连接手机热点
+
+#### 3.7.1 开启 WiFi
+
+```bash
+# 开启 WiFi
+sudo nmcli radio wifi on
+```
+
+#### 3.7.2 扫描并连接热点
+
+```bash
+# 扫描可用热点
+sudo nmcli device wifi list
+
+# 连接手机热点（替换为热点名称和密码）
+sudo nmcli device wifi connect "xiebaolai" password "11111111"
+```
+
+#### 3.7.3 设置 WiFi 开机自动连接
+
+连接成功后，执行：
+
+```bash
+# 查看已连接的热点名称
+nmcli -t -f NAME connection show
+
+# 设置自动连接（替换热点名称）
+sudo nmcli connection modify "xiebaolai" connection.autoconnect yes
+```
+
+或者通过 rc.local 开机启动：
+
+```bash
+sudo vi /etc/rc.local
+```
+
+在 `exit 0` 前添加：
+
+```bash
+# 等待 WiFi 启动
+sleep 10
+sudo nmcli device wifi connect "xiebaolai" password "11111111"
+sleep 5
+sudo ntpdate -b pool.ntp.org
+```
+
+#### 3.7.4 查看 WiFi 状态
+
+```bash
+# 查看 IP 地址
+ip addr show wlan0
+
+# 测试网络连接
+ping -c 3 8.8.8.8
+```
+
+### 3.8 设置时间同步（防止重启后时间丢失）
+
+```bash
+# 安装时间同步工具
+sudo apt-get update
+sudo apt-get install -y ntpdate
+
+# 设置时区
+sudo timedatectl set-timezone Asia/Shanghai
+
+# 手动同步一次时间
+sudo ntpdate -b pool.ntp.org
+```
+
+**设置开机自动同步时间**：在 rc.local 中添加同步命令：
+
+```bash
+sudo vi /etc/rc.local
+```
+
+在 `exit 0` 前添加：
+
+```bash
+sudo ntpdate -b pool.ntp.org
+```
+
 ---
 
 ## 四、运行服务
@@ -115,6 +198,12 @@ ps aux | grep mqtt-gateway
 编辑 `/etc/rc.local`，在 `exit 0` 前添加：
 
 ```bash
+# 等待 WiFi 和时间同步
+sleep 15
+sudo ntpdate -b pool.ntp.org
+sleep 2
+
+# 启动 MQTT 网关
 cd /root/gateway
 nohup ./mqtt-gateway-linux-arm64 -config config.yaml > /root/gateway/logs/gateway.log 2>&1 &
 ```
